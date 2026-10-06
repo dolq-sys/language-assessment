@@ -1,0 +1,965 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Validity, Reliability &amp; Washback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Literata:opsz,wght@7..72,500;7..72,600;7..72,700&display=swap">
+<style>
+/* Layout: a fixed 1280×720 slide stage scaled to fit the window, slim presenter bar underneath.
+   Motif: the OMR answer sheet — every audience choice is a pencil bubble that gets filled in.
+   Type scale is set for projection: nothing on a slide below ~18px at stage size. */
+:root{
+  --page:#DFE5EE; --paper:#FCFDFE; --ink:#13203A; --muted:#4D596E; --line:#D0D8E4; --soft:#EDF1F7;
+  --pen:#1E56B8; --mark:#F5C443; --mark-ink:#3A2A00;
+  --val:#0D7065; --rel:#1E56B8; --wash:#A3500A;
+  --ok:#1B8150; --bad:#C2410C; --on-accent:#FFFFFF;
+  --f-display:"Literata",Georgia,"Times New Roman",serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --page:#090E1B; --paper:#131A2C; --ink:#E6EBF3; --muted:#A3AEC1; --line:#2A3550; --soft:#1A2338;
+  --pen:#86ABF2; --mark:#E7B630; --mark-ink:#251A00;
+  --val:#43C2B0; --rel:#86ABF2; --wash:#EB9F57;
+  --ok:#4CC38A; --bad:#F2875A; --on-accent:#0B1222; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --page:#090E1B; --paper:#131A2C; --ink:#E6EBF3; --muted:#A3AEC1; --line:#2A3550; --soft:#1A2338;
+  --pen:#86ABF2; --mark:#E7B630; --mark-ink:#251A00;
+  --val:#43C2B0; --rel:#86ABF2; --wash:#EB9F57;
+  --ok:#4CC38A; --bad:#F2875A; --on-accent:#0B1222; color-scheme:dark;}
+
+html,body{height:100%}
+body{background:var(--page);color:var(--ink);font-family:var(--f-body);overflow:hidden;display:grid;grid-template-rows:1fr auto;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+[hidden]{display:none!important}
+
+#viewport{position:relative;overflow:hidden;min-height:0}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform:translate(-50%,-50%) scale(var(--s,1));background:var(--paper);border-radius:6px;box-shadow:0 1px 2px rgb(0 0 0 / .06),0 12px 40px rgb(10 20 50 / .14);overflow:hidden}
+
+.slide{position:absolute;inset:0;padding:36px 56px 30px 64px;display:none;flex-direction:column;gap:16px;--sec:var(--pen)}
+.slide.active{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.active{animation:none}*{transition:none!important}}
+.slide[data-sec="val"]{--sec:var(--val)} .slide[data-sec="rel"]{--sec:var(--rel)} .slide[data-sec="wash"]{--sec:var(--wash)}
+.slide::before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;background:var(--sec)}
+
+.top{display:flex;align-items:center;gap:14px;font-family:var(--f-mono);font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.top .sec{color:var(--sec);font-weight:600}
+.top .mins{margin-left:auto;border:1px solid var(--line);border-radius:99px;padding:3px 12px;letter-spacing:.03em}
+.top .kind{background:var(--mark);color:var(--mark-ink);border-radius:4px;padding:3px 10px;font-weight:600}
+.top .kind.theory{background:transparent;color:var(--sec);box-shadow:inset 0 0 0 2px var(--sec)}
+
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:74px;line-height:1.03}
+h2{font-size:44px;line-height:1.1}
+h3{font-size:26px;line-height:1.22}
+p{margin:0;font-size:24px;line-height:1.4}
+.lead{font-size:27px;color:var(--muted);max-width:52ch}
+.small{font-size:21px;line-height:1.38}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono)}
+.hl{background:linear-gradient(transparent 55%,color-mix(in srgb,var(--mark) 70%,transparent) 55%);padding:0 2px}
+.cite{font-family:var(--f-mono);font-size:16px;color:var(--muted)}
+ul.clean{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+ul.clean li{font-size:23px;line-height:1.36;padding-left:26px;position:relative}
+ul.clean li::before{content:"";position:absolute;left:2px;top:.5em;width:11px;height:11px;border-radius:50%;border:2.5px solid var(--sec)}
+ul.clean.sm li{font-size:20px}
+
+.row{display:flex;gap:24px;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px;min-height:0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.fill{flex:1;min-height:0}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--soft);border-radius:10px;padding:16px 20px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.line{background:transparent;border:2px solid var(--line)}
+.card.note{background:color-mix(in srgb,var(--mark) 24%,var(--paper))}
+.tag{font-family:var(--f-mono);font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--sec);font-weight:600}
+.def{border-left:5px solid var(--sec);padding:4px 0 4px 18px;font-size:26px;line-height:1.36}
+.item{font-family:var(--f-display);font-size:23px;line-height:1.42;background:var(--paper);border:1.5px dashed var(--line);border-radius:8px;padding:12px 16px}
+
+.btn{border:2px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 16px;font-size:18px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--ink)}
+.btn.go{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.go:hover{opacity:.88}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+.bub{width:46px;height:46px;border-radius:50%;border:2.5px solid var(--ink);background:transparent;font-family:var(--f-mono);font-weight:600;font-size:19px;display:inline-grid;place-items:center;flex:none;transition:background .15s,color .15s,box-shadow .15s}
+.bub:hover{background:var(--soft)}
+.bub.sel{background:var(--ink);color:var(--paper)}
+.revealed .bub.is-ans{box-shadow:0 0 0 4px var(--paper),0 0 0 7px var(--ok)}
+.revealed .bub.sel.wrong{background:var(--bad);border-color:var(--bad);color:var(--on-accent)}
+.revealed .bub.sel.is-ans{background:var(--ok);border-color:var(--ok);color:var(--on-accent)}
+.q,.q.card{display:flex;flex-direction:row;align-items:center;gap:16px}
+.q .stem{flex:1;font-size:23px;line-height:1.32;min-width:0}
+.q .bubs{display:flex;gap:10px}
+
+.rv{visibility:hidden;opacity:0;transition:opacity .35s ease}
+.revealed .rv{visibility:visible;opacity:1}
+.ans{background:color-mix(in srgb,var(--ok) 12%,var(--paper));border:2px solid color-mix(in srgb,var(--ok) 45%,transparent);border-radius:8px;padding:10px 14px;font-size:21px;line-height:1.36}
+.ans b{color:var(--ok)}
+
+.tally{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:46px 1fr 70px;align-items:center;gap:14px;border:2px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 14px;text-align:left;position:relative;overflow:hidden}
+.opt:hover{border-color:var(--ink)}
+.opt .lab{font-size:23px;line-height:1.25;position:relative;z-index:1}
+.opt .n{font-family:var(--f-mono);font-size:26px;font-weight:600;text-align:right;position:relative;z-index:1;font-variant-numeric:tabular-nums}
+.opt .bar{position:absolute;left:0;top:0;bottom:0;width:0;background:color-mix(in srgb,var(--sec) 16%,transparent);transition:width .3s ease}
+.opt .bub{position:relative;z-index:1;pointer-events:none}
+.revealed .opt.is-ans{border-color:var(--ok);box-shadow:inset 0 0 0 1.5px var(--ok)}
+.revealed .opt.is-ans .bub{background:var(--ok);border-color:var(--ok);color:var(--on-accent)}
+.hint{font-family:var(--f-mono);font-size:15px;color:var(--muted)}
+
+.tmr{display:inline-flex;align-items:center;gap:10px;border:2px solid var(--line);border-radius:99px;padding:6px 16px 6px 6px;background:var(--paper);font-family:var(--f-mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.tmr svg{width:34px;height:34px;transform:rotate(-90deg)}
+.tmr .trk{fill:none;stroke:var(--line);stroke-width:4}
+.tmr .prg{fill:none;stroke:var(--sec);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.tmr.run{border-color:var(--sec)}
+.tmr.done{border-color:var(--bad);color:var(--bad)}
+
+.cls{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;border-bottom:1.5px solid var(--line);padding:10px 0}
+.cls:last-child{border-bottom:0}
+.cls .txt{font-size:22px;line-height:1.32}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--paper);padding:9px 14px;font-size:18px;font-weight:600;border-right:2px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.sel{background:var(--ink);color:var(--paper)}
+.revealed .seg button.is-ans{box-shadow:inset 0 0 0 3px var(--ok)}
+.revealed .seg button.sel.wrong{background:var(--bad);color:var(--on-accent)}
+.revealed .seg button.sel.is-ans{background:var(--ok);color:var(--on-accent)}
+
+.rk{display:grid;grid-template-columns:46px 1fr;gap:14px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--paper);text-align:left}
+.rk:hover{border-color:var(--ink)}
+.rk .pos{width:44px;height:44px;border-radius:50%;border:2.5px dashed var(--line);display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:20px}
+.rk.ranked .pos{border:2.5px solid var(--ink);background:var(--ink);color:var(--paper)}
+.rk .lab{font-size:21px;line-height:1.28}
+.rk .truth{display:none;margin-left:8px;font-family:var(--f-mono);font-size:17px;color:var(--ok);font-weight:600}
+.revealed .rk .truth{display:inline-block}
+
+.step{display:grid;grid-template-columns:54px 1fr 1fr;gap:18px;align-items:start;padding:12px 0;border-top:1.5px solid var(--line);opacity:.12;transition:opacity .35s}
+.step.shown{opacity:1}
+.step .num{width:44px;height:44px;border-radius:50%;background:var(--sec);color:var(--on-accent);display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:19px}
+.step h3{font-size:23px;margin-bottom:4px}
+.step p{font-size:21px;line-height:1.35}
+
+.dv{display:flex;flex-direction:column;gap:6px;border:2px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper);text-align:left}
+.dv:hover{border-color:var(--ink)}
+.dv .k{font-family:var(--f-mono);font-weight:600;color:var(--sec);font-size:18px}
+.dv .lab{font-size:20px;line-height:1.25;font-weight:600}
+.dv .ex{font-size:18px;line-height:1.3;color:var(--muted)}
+.dv .dots{display:flex;flex-wrap:wrap;gap:5px;min-height:16px;margin-top:auto}
+.dv .dots i{width:16px;height:16px;border-radius:50%;background:var(--mark);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--mark-ink) 35%,transparent)}
+
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:20px;line-height:1.32}
+table.t th{font-family:var(--f-mono);font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:8px 10px;border-bottom:2.5px solid var(--ink)}
+table.t td{padding:9px 10px;border-bottom:1.5px solid var(--line);vertical-align:top}
+table.t td:first-child{font-weight:600}
+
+.s-ink{fill:var(--ink)} .s-muted{fill:var(--muted)} .s-paper{fill:var(--paper)} .s-soft{fill:var(--soft)} .s-line{fill:var(--line)}
+.s-sec{fill:var(--sec)} .s-val{fill:var(--val)} .s-rel{fill:var(--rel)} .s-wash{fill:var(--wash)} .s-mark{fill:var(--mark)} .s-ok{fill:var(--ok)} .s-bad{fill:var(--bad)}
+.k-ink{stroke:var(--ink)} .k-line{stroke:var(--line)} .k-muted{stroke:var(--muted)} .k-sec{stroke:var(--sec)} .k-mark{stroke:var(--mark)} .k-bad{stroke:var(--bad)} .k-ok{stroke:var(--ok)} .k-paper{stroke:var(--paper)}
+svg text{font-family:var(--f-body)}
+svg .mono{font-family:var(--f-mono)}
+svg .disp{font-family:var(--f-display)}
+.no{fill:none}
+
+.cov{display:grid;grid-template-columns:200px 1fr 70px;gap:12px;align-items:center;font-size:20px}
+.cov .track{height:28px;background:var(--soft);border-radius:4px;overflow:hidden;display:flex}
+.cov .track i{flex:1;border-right:2px solid var(--paper)}
+.cov .track i.on{background:var(--sec)}
+.cov .v{font-family:var(--f-mono);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.blueprint{display:flex;height:44px;border-radius:6px;overflow:hidden;gap:2px}
+.blueprint span{display:grid;place-items:center;font-size:15px;font-weight:600;color:var(--on-accent);background:var(--sec);white-space:nowrap;overflow:hidden}
+.blueprint span:nth-child(even){background:color-mix(in srgb,var(--sec) 70%,var(--paper))}
+input[type=range]{accent-color:var(--sec);width:100%;height:28px}
+
+.panel{position:absolute;inset:22px 34px;background:var(--paper);border:2px solid var(--line);border-radius:12px;box-shadow:0 20px 60px rgb(0 0 0 / .25);padding:24px 30px;display:flex;flex-direction:column;gap:14px;z-index:5}
+.panel ol{margin:0;padding-left:26px;display:grid;gap:7px;font-size:20px;line-height:1.3}
+
+#bar{display:flex;align-items:center;gap:10px;padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+#bar .grp{display:flex;align-items:center;gap:6px}
+#bar .ic{border:1px solid var(--line);background:var(--paper);border-radius:6px;height:34px;min-width:34px;padding:0 10px;display:inline-grid;place-items:center;font-size:14px;font-weight:500}
+#bar .ic:hover{border-color:var(--ink)}
+#count{font-family:var(--f-mono);font-variant-numeric:tabular-nums;min-width:56px;text-align:center}
+#prog{flex:1;display:flex;gap:2px;height:10px;min-width:120px}
+#prog button{flex:1;border:0;padding:0;border-radius:2px;background:var(--line)}
+#prog button.done{background:color-mix(in srgb,var(--c) 45%,var(--line))}
+#prog button.cur{background:var(--c)}
+#clock{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+#clock.behind{color:var(--bad);border-color:var(--bad)}
+.team{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;padding:0 4px 0 10px;height:34px}
+.team b{font-family:var(--f-mono);font-size:18px;min-width:24px;text-align:center;font-variant-numeric:tabular-nums}
+.team button{border:0;background:var(--soft);border-radius:4px;width:26px;height:26px}
+#notes{position:absolute;right:12px;bottom:12px;width:min(460px,calc(100% - 24px));max-height:70%;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 40px rgb(0 0 0 / .2);padding:16px 18px;font-size:15px;line-height:1.5;z-index:10}
+#notes h4{margin:0 0 6px;font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#notes ul{margin:0;padding-left:18px}
+aside.notes{display:none}
+@media (max-width:700px){.team span,#bar .opt-hide{display:none}}
+</style>
+
+<div id="viewport">
+<div id="stage">
+
+<!-- ============ OPENING ============ -->
+<section class="slide" data-sec="intro" data-min="0.5">
+  <div class="top"><span class="sec">Language Assessment · QH.26.D1</span><span>Group 2</span><span class="mins">~0:30</span></div>
+  <div class="row fill" style="align-items:center;gap:36px">
+    <div class="col" style="flex:1.3;gap:24px">
+      <h1>Validity, Reliability <span class="muted">&amp;</span> Washback</h1>
+      <p class="lead">Three questions every language test has to answer: theory first, then real Vietnamese tests and the 2026 TOEFL&nbsp;iBT redesign.</p>
+      <div class="grid3" style="gap:8px 18px;margin-top:6px;font-size:20px">
+        <span>Mai Thị Minh Anh</span><span>Nguyễn Thị Mai Anh</span><span>Bùi Phương Anh</span>
+        <span>Hoàng Thế Sơn</span><span>Lê Quang Độ</span><span>Phan Anh</span>
+      </div>
+    </div>
+    <svg viewBox="0 0 380 470" width="360" height="446" aria-label="An answer sheet with filled bubbles" role="img">
+      <rect x="20" y="14" width="330" height="440" rx="10" class="s-soft"/>
+      <rect x="20" y="14" width="330" height="440" rx="10" class="no k-line" stroke-width="2"/>
+      <rect x="44" y="40" width="150" height="14" rx="3" class="s-line"/>
+      <rect x="44" y="64" width="96" height="10" rx="3" class="s-line"/>
+      <rect x="250" y="38" width="76" height="40" rx="4" class="no k-muted" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <text x="288" y="63" text-anchor="middle" class="mono s-muted" font-size="13">SCORE</text>
+      <g id="sheetRows"></g>
+      <path d="M48 410 C 120 398, 220 420, 320 404" class="no k-mark" stroke-width="18" stroke-linecap="round" opacity=".55"/>
+      <text x="184" y="416" text-anchor="middle" class="disp s-ink" font-size="19" font-weight="600">valid? reliable? washback?</text>
+    </svg>
+  </div>
+  <aside class="notes"><ul><li>Chào lớp, giới thiệu nhóm 2. Cấu trúc mỗi phần: lý thuyết → ví dụ minh hoạ → hoạt động.</li><li>Phím: → / ← chuyển slide, N ghi chú, T đồng hồ 30 phút, F toàn màn hình.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="intro" data-min="0.5">
+  <div class="top"><span class="sec">Before we start</span><span class="mins">~0:30</span></div>
+  <h2>30 minutes, two teams, lots of voting</h2>
+  <svg viewBox="0 0 1160 100" width="1160" height="100" role="img" aria-label="Agenda timeline"><g id="agenda"></g></svg>
+  <div class="grid3">
+    <div class="card"><span class="tag">Teams</span><h3>Left vs right</h3><p class="small">Left half is <b>Team Messick</b>, right half is <b>Team Hughes</b>. Correct answers score points.</p></div>
+    <div class="card"><span class="tag">Voting</span><h3>Raise your hand</h3><p class="small">When answer bubbles appear, raise your hand. We count hands on screen before revealing.</p></div>
+    <div class="card"><span class="tag">Flow</span><h3>Theory, then examples</h3><p class="small">Each idea comes as <b>theory</b> first, then a real <b>example</b> or activity.</p></div>
+  </div>
+  <aside class="notes"><ul><li>Chia lớp làm 2 đội theo chỗ ngồi. Điểm cộng ở thanh dưới cùng (nút + / −).</li><li>Nhấn T để bắt đầu đồng hồ; đồng hồ đỏ khi chậm tiến độ.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="intro" data-min="1.5" data-scope>
+  <div class="top"><span class="sec">Warm-up</span><span class="kind">Match</span><span class="mins">~1:30</span></div>
+  <div class="row" style="align-items:end"><h2 style="flex:1">Which quality answers which question?</h2><button class="tmr" data-s="45"></button></div>
+  <div class="row" style="gap:12px;align-items:center;font-size:22px">
+    <span class="bub" style="pointer-events:none">V</span>Validity
+    <span class="bub" style="pointer-events:none;margin-left:20px">R</span>Reliability
+    <span class="bub" style="pointer-events:none;margin-left:20px">W</span>Washback
+  </div>
+  <div class="col" style="gap:14px">
+    <div class="q card line" data-ans="R"><span class="stem">“Can we trust the score?”</span><span class="bubs"><button class="bub" data-v="V">V</button><button class="bub" data-v="R">R</button><button class="bub" data-v="W">W</button></span></div>
+    <div class="q card line" data-ans="W"><span class="stem">“What does the test make teachers and students do?”</span><span class="bubs"><button class="bub" data-v="V">V</button><button class="bub" data-v="R">R</button><button class="bub" data-v="W">W</button></span></div>
+    <div class="q card line" data-ans="V"><span class="stem">“Are we testing the right thing?”</span><span class="bubs"><button class="bub" data-v="V">V</button><button class="bub" data-v="R">R</button><button class="bub" data-v="W">W</button></span></div>
+  </div>
+  <div class="actions"><button class="btn go" data-reveal>Check answers</button><span class="hint">Click a bubble to record the room’s choice.</span></div>
+  <aside class="notes"><ul><li>45 giây. Gọi 1 người mỗi đội trả lời, bấm bong bóng rồi "Check".</li><li>Đây là khung cả bài: Validity → Reliability → Washback.</li></ul></aside>
+</section>
+
+<!-- ============ 1 VALIDITY ============ -->
+<section class="slide" data-sec="val" data-min="1.5">
+  <div class="top"><span class="sec">1.1 · Construct validity</span><span class="kind theory">Theory</span><span class="mins">~1:30</span></div>
+  <h2>Validity: are we testing the right thing?</h2>
+  <div class="row fill" style="gap:28px">
+    <div class="col" style="flex:1;gap:14px">
+      <p class="def">A test is <b>valid</b> if it measures accurately what it is intended to measure.</p>
+      <p class="small"><b>Construct validity:</b> whether a test measures the underlying ability or trait (the <i>construct</i>) it claims to measure.</p>
+      <div class="card"><span class="tag">Two threats · Messick (1996)</span>
+        <p class="small"><b>Construct under-representation:</b> the test is too narrow and misses important dimensions of the construct.</p>
+        <p class="small"><b>Construct-irrelevant variance:</b> the test involves factors outside the construct, e.g. general knowledge, first-language background.</p>
+      </div>
+    </div>
+    <svg viewBox="0 0 540 420" width="500" height="390" role="img" aria-label="Venn diagram of construct and test">
+      <circle cx="205" cy="220" r="160" class="s-val" opacity=".13"/>
+      <circle cx="335" cy="220" r="160" class="s-mark" opacity=".28"/>
+      <circle cx="205" cy="220" r="160" class="no k-ink" stroke-width="2.5"/>
+      <circle cx="335" cy="220" r="160" class="no k-ink" stroke-width="2.5" stroke-dasharray="8 6"/>
+      <text x="130" y="38" text-anchor="middle" class="disp s-ink" font-size="23" font-weight="600">The construct</text>
+      <text x="420" y="38" text-anchor="middle" class="disp s-ink" font-size="23" font-weight="600">What the test measures</text>
+      <text x="270" y="214" text-anchor="middle" class="s-ink" font-size="21" font-weight="700">valid</text>
+      <text x="270" y="238" text-anchor="middle" class="s-ink" font-size="21" font-weight="700">overlap</text>
+      <text x="128" y="206" text-anchor="middle" class="s-val" font-size="18" font-weight="700">under-</text>
+      <text x="128" y="228" text-anchor="middle" class="s-val" font-size="18" font-weight="700">representation</text>
+      <text x="128" y="254" text-anchor="middle" class="s-muted" font-size="16">skill never</text><text x="128" y="274" text-anchor="middle" class="s-muted" font-size="16">tested</text>
+      <text x="414" y="206" text-anchor="middle" class="s-wash" font-size="19" font-weight="700">irrelevant</text>
+      <text x="414" y="228" text-anchor="middle" class="s-wash" font-size="19" font-weight="700">variance</text>
+      <text x="414" y="254" text-anchor="middle" class="s-muted" font-size="16">tested, but</text><text x="414" y="274" text-anchor="middle" class="s-muted" font-size="16">not the skill</text>
+    </svg>
+  </div>
+  <aside class="notes"><ul><li>Vòng trái = năng lực cần đo; vòng phải = thứ bài test thực sự đo.</li><li>Chỉ vòng trái = under-representation; chỉ vòng phải = irrelevant variance. Slide sau: lớp tự nhận diện.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="1.5">
+  <div class="top"><span class="sec">1.1 · Construct validity</span><span class="kind">Example · Vote</span><span class="mins">~1:30</span></div>
+  <h2>Spot the threat</h2>
+  <div class="grid2 fill">
+    <div class="col card line" data-scope>
+      <span class="tag">Item 1 · Grammar test (tenses)</span>
+      <div class="item">Phạm Thị Thanh Trà ______ as a Deputy Prime Minister of Vietnam.<br><span class="mono" style="font-size:20px">A. serves &nbsp;B. served &nbsp;C. will serve</span></div>
+      <div class="tally" data-ans="b">
+        <button class="opt" data-v="a"><span class="bar"></span><span class="bub">1</span><span class="lab">Under-representation</span><span class="n">0</span></button>
+        <button class="opt" data-v="b"><span class="bar"></span><span class="bub">2</span><span class="lab">Irrelevant variance</span><span class="n">0</span></button>
+      </div>
+      <div class="row" style="align-items:center;gap:12px"><button class="btn go" data-reveal>Reveal</button><div class="ans rv" style="flex:1">Tests <b>tenses</b>, but needs knowledge of Vietnamese current affairs.</div></div>
+    </div>
+    <div class="col card line" data-scope>
+      <span class="tag">Item 2 · Speaking test</span>
+      <div class="item">Claims to assess <i>communicating effectively</i>. Tasks: read a passage aloud, answer five short questions.</div>
+      <div class="tally" data-ans="a">
+        <button class="opt" data-v="a"><span class="bar"></span><span class="bub">1</span><span class="lab">Under-representation</span><span class="n">0</span></button>
+        <button class="opt" data-v="b"><span class="bar"></span><span class="bub">2</span><span class="lab">Irrelevant variance</span><span class="n">0</span></button>
+      </div>
+      <div class="row" style="align-items:center;gap:12px"><button class="btn go" data-reveal>Reveal</button><div class="ans rv" style="flex:1">Interaction, spontaneous speech, turn-taking: <b>not assessed</b>.</div></div>
+    </div>
+  </div>
+  <p class="hint">Click an option once per raised hand. Right-click removes one.</p>
+  <aside class="notes"><ul><li>Đọc item 1, lớp giơ tay chọn 1 hoặc 2; bấm đếm rồi Reveal. Tương tự item 2.</li><li>Item 2: thiếu tương tác, nói tự phát, luân phiên lượt lời, phản hồi người đối thoại.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="1">
+  <div class="top"><span class="sec">1.2.1 · Content validity</span><span class="kind theory">Theory</span><span class="mins">~1:00</span></div>
+  <h2>Forms of validity evidence: content validity</h2>
+  <div class="row fill" style="gap:30px;align-items:start">
+    <div class="col" style="flex:1.15;gap:16px">
+      <p class="def">Established when test content is a <b>representative sample</b> of the language skills, structures or objectives it is meant to cover.</p>
+      <ul class="clean">
+        <li>Requires explicit <b>test specifications</b>, written before the test, to guide principled selection of items.</li>
+        <li>Prevents <b>harmful backwash</b>: skills the test ignores tend to be ignored in teaching too.</li>
+      </ul>
+    </div>
+    <div class="card" style="flex:.85">
+      <span class="tag">Picture it</span>
+      <svg viewBox="0 0 420 290" width="100%" height="280" role="img" aria-label="Test items sampled evenly from the course"><g id="sampleViz"></g></svg>
+      <p class="small muted">Items spread across every unit, not bunched in one.</p>
+    </div>
+  </div>
+  <aside class="notes"><ul><li>Nhấn mạnh: cần bảng đặc tả (test specs) trước khi viết đề.</li><li>Hình: chấm vàng = câu hỏi; bên trái phân bố đều, bên phải dồn vào 1 unit.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="1.5" data-scope>
+  <div class="top"><span class="sec">1.2.1 · Content validity</span><span class="kind">Example · Guess</span><span class="mins">~1:30</span></div>
+  <h2>Case: Grade 11 mid-term test, Semester 1</h2>
+  <div class="row fill" style="gap:28px">
+    <div class="col" style="flex:.9">
+      <p class="small">Purpose: assess achievement of <b>Units 1–3</b>, Global Success, after half a semester. The curriculum lists <b>29 objectives</b>.</p>
+      <span class="tag">Test blueprint (points)</span>
+      <div class="blueprint"><span style="flex:5">Listen</span><span style="flex:5">Gram</span><span style="flex:5">Pron</span><span style="flex:5">Vocab</span><span style="flex:5">Spk</span><span style="flex:5">Read</span><span style="flex:15">Writing</span></div>
+      <div class="card line"><h3 style="font-size:24px">How many of the 29 objectives does it cover?</h3>
+        <div class="row" style="align-items:center;gap:16px"><input type="range" id="guess" min="0" max="29" value="20" aria-label="Guess"><span class="mono" style="font-size:34px;font-weight:600;min-width:100px" id="guessOut">20/29</span></div>
+        <div class="actions"><button class="btn go" data-reveal>Reveal</button></div>
+      </div>
+    </div>
+    <div class="col rv" style="flex:1.1;gap:14px;justify-content:center">
+      <div class="cov"><span>Unit 1 · Healthy life</span><span class="track" data-n="10" data-on="5"></span><span class="v">5/10</span></div>
+      <div class="cov"><span>Unit 2 · Generation gap</span><span class="track" data-n="9" data-on="2"></span><span class="v">2/9</span></div>
+      <div class="cov"><span>Unit 3 · Future cities</span><span class="track" data-n="10" data-on="2"></span><span class="v">2/10</span></div>
+      <div class="cov" style="border-top:2.5px solid var(--ink);padding-top:10px"><b>Total</b><span></span><span class="v" style="font-size:26px">10/29</span></div>
+      <p class="small muted">Unit 3 is heavily under-represented.</p>
+    </div>
+  </div>
+  <aside class="notes"><ul><li>Cho lớp đoán; đội đoán gần 10 nhất được +1.</li><li>Ma trận đề: Listening T/F 5, Grammar 5, Pron 5, Vocab 5, Functional speaking MCQ 5, Reading cloze 5, Writing 15.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="1" data-scope>
+  <div class="top"><span class="sec">1.2.1 · Content validity</span><span class="kind">Example · Pair talk</span><span class="mins">~1:00</span></div>
+  <h2>What else went wrong, and how would you fix it?</h2>
+  <div class="grid2">
+    <div class="card"><span class="tag">Pronunciation gaps</span><p class="small">Weak forms of auxiliaries, contractions, linking consonant to vowel: objectives, but not tested.</p></div>
+    <div class="card"><span class="tag">“Speaking” items</span><p class="small">Objectives ask students to <i>give instructions</i>, <i>talk about generations</i>. Items only test recognising suitable responses.</p></div>
+  </div>
+  <div class="row" style="align-items:center;gap:18px">
+    <h3 style="flex:1">With a neighbour: one change that would raise this test’s validity.</h3>
+    <button class="tmr" data-s="45"></button>
+  </div>
+  <div class="actions"><button class="btn go" data-reveal>Show our answer</button></div>
+  <div class="row rv" style="gap:18px;align-items:stretch">
+    <div class="ans" style="flex:1"><b>Test oral production.</b> Students actually speak, so speaking objectives are measured directly.</div>
+    <div class="card note" style="flex:1"><p class="small"><b>But</b> would two teachers give the same mark? Hold that thought for <b>Reliability</b>.</p></div>
+  </div>
+  <aside class="notes"><ul><li>45 giây thảo luận cặp, gọi 2 người chia sẻ.</li><li>Câu bắc cầu: sửa validity như vậy có nảy sinh vấn đề khác không? → Reliability.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="1" data-scope>
+  <div class="top"><span class="sec">1.2.2–1.2.3 · Criterion-related</span><span class="kind theory">Theory + example</span><span class="mins">~1:00</span></div>
+  <h2>Do scores agree with an independent criterion?</h2>
+  <div class="grid2">
+    <div class="card line"><span class="tag">Concurrent validity</span>
+      <p class="small">Test scores compared with a criterion given at <b>roughly the same time</b>.</p>
+      <svg viewBox="0 0 500 112" width="100%" height="108" role="img" aria-label="Two tests at the same time">
+        <line x1="10" y1="104" x2="490" y2="104" class="k-line" stroke-width="2"/>
+        <rect x="150" y="10" width="160" height="38" rx="5" class="s-val"/><text x="230" y="35" text-anchor="middle" class="s-paper" font-size="17" font-weight="600">10-min test</text>
+        <rect x="150" y="56" width="320" height="38" rx="5" class="s-soft"/><rect x="150" y="56" width="320" height="38" rx="5" class="no k-ink" stroke-width="2"/><text x="310" y="81" text-anchor="middle" class="s-ink" font-size="17" font-weight="600">45-min criterion test</text>
+        <path d="M134 29 q -26 24 0 46" class="no k-ink" stroke-width="2.5"/><text x="106" y="58" text-anchor="end" class="s-ink" font-size="17" font-weight="700">compare</text>
+      </svg>
+      <p class="small muted">High agreement = evidence of concurrent validity.</p>
+    </div>
+    <div class="card line"><span class="tag">Predictive validity</span>
+      <p class="small">How well a test <b>predicts future performance</b>.</p>
+      <svg viewBox="0 0 500 112" width="100%" height="108" role="img" aria-label="Test now predicts performance later">
+        <line x1="10" y1="104" x2="490" y2="104" class="k-line" stroke-width="2"/>
+        <text x="490" y="98" text-anchor="end" class="mono s-muted" font-size="14">time →</text>
+        <rect x="10" y="30" width="170" height="42" rx="5" class="s-val"/><text x="95" y="57" text-anchor="middle" class="s-paper" font-size="17" font-weight="600">Placement test</text>
+        <path d="M188 51 H 290" class="no k-ink" stroke-width="2.5" stroke-dasharray="6 5"/><path d="M290 44 l12 7 -12 7z" class="s-ink"/>
+        <text x="240" y="40" text-anchor="middle" class="s-muted" font-size="15">predicts</text>
+        <rect x="310" y="30" width="180" height="42" rx="5" class="s-soft"/><rect x="310" y="30" width="180" height="42" rx="5" class="no k-ink" stroke-width="2"/><text x="400" y="57" text-anchor="middle" class="s-ink" font-size="17" font-weight="600">Right class?</text>
+      </svg>
+      <p class="small muted">Placement score predicts appropriate class placement.</p>
+    </div>
+  </div>
+  <div class="cls" data-ans="P" style="border:0"><span class="txt"><b>Quick check:</b> entrance English scores checked against results in English-medium courses a year later.</span><span class="seg"><button data-v="C">Concurrent</button><button data-v="P">Predictive</button></span></div>
+  <div class="actions"><button class="btn go" data-reveal>Check</button><span class="small muted"><b>1.2.3 Other evidence:</b> what test-takers actually do, via <b>think-aloud</b> or <b>retrospection</b>.</span></div>
+  <aside class="notes"><ul><li>Concurrent: bài 10 phút so với bài 45 phút cùng thời điểm. Predictive: dự đoán kết quả tương lai.</li><li>Quick check → Predictive. 1.2.3: think-aloud / hồi tưởng.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="1">
+  <div class="top"><span class="sec">1.3 · Scoring, face validity, fairness</span><span class="kind theory">Theory</span><span class="mins">~1:00</span></div>
+  <h2>Three more conditions for a valid test</h2>
+  <div class="grid3 fill" style="align-items:start">
+    <div class="card" style="border-top:5px solid var(--val)"><span class="tag">Scoring validity</span><h3>Score what you test</h3><p class="small">The scoring criteria should reflect the ability the test is intended to measure.</p></div>
+    <div class="card" style="border-top:5px solid var(--val)"><span class="tag">Face validity</span><h3>Looks the part</h3><p class="small">The test <b>looks as if</b> it measures what it claims to. Looking right is not the same as construct validity.</p></div>
+    <div class="card" style="border-top:5px solid var(--val)"><span class="tag">Fairness</span><h3>Design + administration</h3>
+      <ul class="clean sm"><li>Equal chance to show ability: familiarisation, model versions, feedback, accommodations</li><li>Appropriate conditions, good equipment</li><li>Use tests only for their intended purpose</li></ul></div>
+  </div>
+  <aside class="notes"><ul><li>Đọc nhanh 3 khái niệm; slide sau là ví dụ để lớp gọi tên.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="1" data-scope>
+  <div class="top"><span class="sec">1.3 · Scoring, face validity, fairness</span><span class="kind">Example · Name it</span><span class="mins">~1:00</span></div>
+  <h2>Name the problem</h2>
+  <div class="col" style="gap:0">
+    <div class="cls" data-ans="S"><span class="txt">A <b>reading</b> test with short answers. The teacher deducts marks for spelling and grammar.</span><span class="seg"><button data-v="S">Scoring</button><button data-v="F">Face</button><button data-v="R">Fairness</button></span></div>
+    <div class="ans rv" style="margin-bottom:6px">Scoring adds <b>writing accuracy</b> to a reading score.</div>
+    <div class="cls" data-ans="F"><span class="txt">A “pronunciation” test uses odd-one-out multiple choice. Nobody produces a sound.</span><span class="seg"><button data-v="S">Scoring</button><button data-v="F">Face</button><button data-v="R">Fairness</button></span></div>
+    <div class="ans rv" style="margin-bottom:6px">It <b>looks like</b> a pronunciation test, but lacks construct validity.</div>
+    <div class="cls" data-ans="R"><span class="txt">The listening speaker is broken at the back of one exam room.</span><span class="seg"><button data-v="S">Scoring</button><button data-v="F">Face</button><button data-v="R">Fairness</button></span></div>
+    <div class="ans rv">Candidates need <b>appropriate conditions and good equipment</b>.</div>
+  </div>
+  <div class="actions"><button class="btn go" data-reveal>Check</button></div>
+  <aside class="notes"><ul><li>Mỗi đội chọn 1 tình huống, bấm Check.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="val" data-min="0.5">
+  <div class="top"><span class="sec">1.4 · Making tests more valid</span><span class="kind theory">Theory</span><span class="mins">~0:30</span></div>
+  <h2>How to make tests more valid</h2>
+  <div class="grid2 fill" style="align-content:start">
+    <div class="card"><span class="tag">1</span><h3>Write explicit test specifications</h3></div>
+    <div class="card"><span class="tag">2</span><h3>Use direct testing</h3></div>
+    <div class="card"><span class="tag">3</span><h3>Make sure scoring relates directly to what is being tested</h3></div>
+    <div class="card note"><span class="tag" style="color:var(--mark-ink)">4 · Bridge to part 2</span><h3>Make the test reliable. If it is not reliable, it cannot be valid.</h3></div>
+  </div>
+  <aside class="notes"><ul><li>Tóm tắt phần Validity; ý 4 dẫn sang Reliability.</li></ul></aside>
+</section>
+
+<!-- ============ 2 RELIABILITY ============ -->
+<section class="slide" data-sec="rel" data-min="1" data-scope>
+  <div class="top"><span class="sec">2 · Reliability</span><span class="kind">Hook · Vote</span><span class="mins">~1:00</span></div>
+  <h2>Lan got <span class="hl">7.5</span> on her Grade 9 mid-term on Thursday. Had she taken it on Wednesday…</h2>
+  <div class="tally" data-ans="b" style="max-width:820px">
+    <button class="opt" data-v="a"><span class="bar"></span><span class="bub">A</span><span class="lab">She would get exactly 7.5</span><span class="n">0</span></button>
+    <button class="opt" data-v="b"><span class="bar"></span><span class="bub">B</span><span class="lab">Probably close to 7.5</span><span class="n">0</span></button>
+    <button class="opt" data-v="c"><span class="bar"></span><span class="bub">C</span><span class="lab">It could be quite different</span><span class="n">0</span></button>
+  </div>
+  <div class="actions"><button class="btn go" data-reveal>Reveal</button></div>
+  <div class="ans rv">Never exactly: people never perform identically twice, even with a perfect test and perfect scoring (Hughes). A <b>reliable</b> test makes B the answer.</div>
+  <aside class="notes"><ul><li>Đếm tay A/B/C. Theo Hughes: không bao giờ "y hệt"; bài thi tin cậy giúp điểm "gần 7.5".</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="1">
+  <div class="top"><span class="sec">2 · Reliability</span><span class="kind theory">Theory</span><span class="mins">~1:00</span></div>
+  <h2>Reliability: can we trust the score?</h2>
+  <p class="def">Reliability is the <b>consistency of test scores</b> across different test administrations or occasions.</p>
+  <p class="small">Two sources of inconsistency:</p>
+  <div class="grid2">
+    <div class="card" style="flex-direction:row;align-items:center;gap:20px">
+      <svg viewBox="0 0 80 80" width="88" height="88" aria-hidden="true"><circle cx="40" cy="24" r="14" class="s-rel"/><path d="M14 74 q26 -40 52 0z" class="s-rel"/></svg>
+      <div class="col" style="gap:4px"><h3>1 · Candidates’ performance</h3><p class="small muted">Mood, health, sleep, luck with particular items.</p></div></div>
+    <div class="card" style="flex-direction:row;align-items:center;gap:20px">
+      <svg viewBox="0 0 80 80" width="88" height="88" aria-hidden="true"><rect x="16" y="12" width="48" height="62" rx="5" class="s-rel"/><rect x="28" y="6" width="24" height="12" rx="3" class="s-ink"/><path d="M26 36 l6 6 12 -12" class="no k-paper" stroke-width="4"/><rect x="26" y="52" width="28" height="4" class="s-paper"/></svg>
+      <div class="col" style="gap:4px"><h3>2 · Scoring</h3><p class="small muted">Different scorers, or one scorer on different days.</p></div></div>
+  </div>
+  <aside class="notes"><ul><li>Định nghĩa + 2 nguồn gây thiếu ổn định: thí sinh và người chấm.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="1" data-scope>
+  <div class="top"><span class="sec">2.1.1 · Reliability coefficient</span><span class="kind">Theory → Rank</span><span class="mins">~1:00</span></div>
+  <h2>The reliability coefficient: how high is enough?</h2>
+  <svg viewBox="0 0 1160 112" width="1160" height="112" role="img" aria-label="Reliability coefficient scale from 0 to 1">
+    <rect x="40" y="44" width="1080" height="26" rx="3" class="s-soft"/>
+    <rect x="80" y="44" width="1000" height="26" class="s-rel" opacity=".18"/>
+    <g id="ruler"></g>
+    <text x="40" y="104" class="s-muted" font-size="17">0 · no consistency</text>
+    <text x="1120" y="104" text-anchor="end" class="s-muted" font-size="17">1 · perfect consistency</text>
+    <text x="580" y="104" text-anchor="middle" class="s-rel" font-size="17" font-weight="600">real tests always fall in between</text>
+    <g class="rv" id="rankMarks"></g>
+  </svg>
+  <p class="small">It depends on the <b>stakes</b>: the more important the decision, the higher the reliability we must demand. Rank from <b>lowest</b> to <b>highest</b> need:</p>
+  <div class="row fill" style="gap:24px">
+    <div class="col" style="flex:1.25">
+      <div class="rank grid2" data-order="B,A,D,C" style="gap:10px">
+        <button class="rk" data-v="A"><span class="pos"></span><span class="lab">A · 15-min pop quiz, Grade 7<span class="truth"></span></span></button>
+        <button class="rk" data-v="B"><span class="pos"></span><span class="lab">B · Mock test at a language centre<span class="truth"></span></span></button>
+        <button class="rk" data-v="C"><span class="pos"></span><span class="lab">C · Public Grade 10 entrance exam<span class="truth"></span></span></button>
+        <button class="rk" data-v="D"><span class="pos"></span><span class="lab">D · University graduation English test<span class="truth"></span></span></button>
+      </div>
+      <div class="actions"><button class="btn" data-rank-reset>Reset</button><button class="btn go" data-reveal>Reveal order</button></div>
+    </div>
+    <div class="col rv" style="flex:.75">
+      <div class="ans"><b>B → A → D → C.</b> A and B are both low stakes and can swap.</div>
+      <div class="card note"><p class="small"><b>Follow-up:</b> is the pop quiz then <i>allowed</i> to be unreliable?</p></div>
+    </div>
+  </div>
+  <aside class="notes"><ul><li>Hệ số 0 (không nhất quán) – 1 (hoàn toàn nhất quán); bài thi thực tế luôn ở giữa.</li><li>Gọi 1 người bấm thứ tự. Follow-up: tranh luận 20 giây.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="1">
+  <div class="top"><span class="sec">2.1.2 · Estimating reliability</span><span class="kind theory">Theory + examples</span><span class="mins">~1:00</span></div>
+  <h2>Three methods for estimating reliability</h2>
+  <div class="tw"><table class="t">
+    <thead><tr><th style="width:170px">Method</th><th>How</th><th>Limitation</th><th>Vietnamese example</th></tr></thead>
+    <tbody>
+      <tr><td><svg viewBox="0 0 60 30" width="60" height="30" aria-hidden="true"><rect x="2" y="3" width="18" height="24" rx="2" class="s-rel"/><rect x="40" y="3" width="18" height="24" rx="2" class="s-rel"/><path d="M23 15 H36" class="no k-ink" stroke-width="2" stroke-dasharray="3 3"/></svg><br>Test–retest</td><td>Same test, same group, taken twice</td><td>Too soon: they remember items. Too late: learning or forgetting. Little motivation.</td><td>A centre repeats a mock test after one week, or after summer</td></tr>
+      <tr><td><svg viewBox="0 0 60 30" width="60" height="30" aria-hidden="true"><rect x="2" y="3" width="18" height="24" rx="2" class="s-rel"/><rect x="40" y="3" width="18" height="24" rx="2" class="s-rel" opacity=".5"/><text x="30" y="20" text-anchor="middle" class="s-ink" font-size="14">≈</text></svg><br>Alternate forms</td><td>Two equivalent versions of the test</td><td>Truly equivalent forms are often not available</td><td>Placement test Form A and Form B</td></tr>
+      <tr><td><svg viewBox="0 0 60 30" width="60" height="30" aria-hidden="true"><rect x="18" y="1" width="24" height="28" rx="2" class="s-soft"/><g id="splitRows"></g></svg><br>Split half</td><td>One sitting; two scores from equal halves, e.g. odd vs even items</td><td>Halves must be equivalent; correct with Spearman–Brown</td><td>40-item MC test: items 1, 3, 5… vs 2, 4, 6…</td></tr>
+    </tbody>
+  </table></div>
+  <aside class="notes"><ul><li>Giải thích ngắn từng phương pháp; slide sau là câu hỏi tương tác.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="0.5">
+  <div class="top"><span class="sec">2.1.2 · Estimating reliability</span><span class="kind">Example · Vote</span><span class="mins">~0:30</span></div>
+  <h2>Which method would you use?</h2>
+  <div class="grid2 fill">
+    <div class="col card line" data-scope>
+      <p class="small"><b>Q1.</b> Your centre has one version of its placement test, and students won’t sit it twice.</p>
+      <div class="tally" data-ans="c">
+        <button class="opt" data-v="a"><span class="bar"></span><span class="bub">A</span><span class="lab">Test–retest</span><span class="n">0</span></button>
+        <button class="opt" data-v="b"><span class="bar"></span><span class="bub">B</span><span class="lab">Alternate forms</span><span class="n">0</span></button>
+        <button class="opt" data-v="c"><span class="bar"></span><span class="bub">C</span><span class="lab">Split half</span><span class="n">0</span></button>
+      </div>
+      <button class="btn go" data-reveal style="align-self:start">Reveal</button>
+    </div>
+    <div class="col card line" data-scope>
+      <p class="small"><b>Q2.</b> Exams with several <i>mã đề</i>: the same questions in a different order. Alternate forms?</p>
+      <div class="tally" data-ans="b">
+        <button class="opt" data-v="a"><span class="bar"></span><span class="bub">A</span><span class="lab">Yes</span><span class="n">0</span></button>
+        <button class="opt" data-v="b"><span class="bar"></span><span class="bub">B</span><span class="lab">Not really</span><span class="n">0</span></button>
+      </div>
+      <button class="btn go" data-reveal style="align-self:start">Reveal</button>
+      <div class="ans rv">Same items, only reordered: not two different, equivalent versions.</div>
+    </div>
+  </div>
+  <aside class="notes"><ul><li>Q1 → Split half. Q2 → không hẳn: cùng câu hỏi, chỉ đảo thứ tự.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="1">
+  <div class="top"><span class="sec">2.2 · SEM</span><span class="kind">Theory → Play</span><span class="mins">~1:00</span></div>
+  <h2>Standard error of measurement: Lan’s 7.5 is a range</h2>
+  <div class="row fill" style="gap:26px">
+    <div class="col" style="flex:.9;gap:12px">
+      <p class="small"><b>True score:</b> the average a candidate would get if tested endlessly, with no learning or fatigue.</p>
+      <p class="def mono" style="font-size:22px">observed = true score + error</p>
+      <p class="small"><b>SEM</b> estimates the uncertainty about the observed score.</p>
+      <div class="card"><label class="small" for="sem"><b>SEM of this test:</b> <span class="mono" id="semOut">0.5</span></label><input type="range" id="sem" min="0.1" max="1.2" step="0.1" value="0.5">
+      <p class="small" id="semText" style="font-size:19px"></p></div>
+    </div>
+    <svg viewBox="0 0 600 340" width="580" height="330" role="img" aria-label="Score band around 7.5"><g id="semPlot"></g></svg>
+  </div>
+  <aside class="notes"><ul><li>Kéo SEM: nhỏ → dải hẹp; lớn → không chắc Lan đã vượt 7.0.</li><li>Chính xác: observed = true + error; SEM là độ lớn điển hình của sai số. ±1 SEM ≈ 68%, ±2 SEM ≈ 95%.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="0.5">
+  <div class="top"><span class="sec">2.3 · Scorer reliability</span><span class="kind theory">Theory</span><span class="mins">~0:30</span></div>
+  <h2>Would the same essay get the same mark?</h2>
+  <div class="grid2">
+    <div class="card line" style="align-items:center">
+      <svg viewBox="0 0 460 140" width="100%" height="130" role="img" aria-label="One scorer, two occasions"><g id="intra"></g></svg>
+      <span class="tag">Intra-scorer</span><p class="small" style="text-align:center">Same scorer, same score on two occasions</p>
+    </div>
+    <div class="card line" style="align-items:center">
+      <svg viewBox="0 0 460 140" width="100%" height="130" role="img" aria-label="Two scorers, same essay"><g id="inter"></g></svg>
+      <span class="tag">Inter-scorer</span><p class="small" style="text-align:center">Any other scorer gives that same score</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Objective test</h3><p class="small">One easily recognised correct answer (MC). A computer could score it: scorer reliability = 1.</p></div>
+    <div class="card"><h3>Subjective test</h3><p class="small">Interviews, essays need judgement. Not perfect, but can be made high enough.</p></div>
+  </div>
+  <aside class="notes"><ul><li>Lướt nhanh, dẫn vào hoạt động "Candidate or Scorer?".</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="1" data-scope>
+  <div class="top"><span class="sec">2.4 · More reliable tests</span><span class="kind">Team game</span><span class="mins">~1:00</span></div>
+  <div class="row" style="align-items:end"><h2 style="flex:1">Candidate side (A) or scorer side (B)?</h2><button class="tmr" data-s="60"></button></div>
+  <div class="grid2" style="gap:0 30px">
+    <div class="cls" data-ans="A"><span class="txt">Take enough samples of behaviour</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+    <div class="cls" data-ans="B"><span class="txt">Provide a detailed scoring key</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+    <div class="cls" data-ans="A"><span class="txt">Write unambiguous items</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+    <div class="cls" data-ans="B"><span class="txt">Train scorers</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+    <div class="cls" data-ans="B"><span class="txt">Agree acceptable responses in advance</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+    <div class="cls" data-ans="A"><span class="txt">Clear, explicit instructions</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+    <div class="cls" data-ans="A"><span class="txt">Familiarise candidates with the format</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+    <div class="cls" data-ans="B"><span class="txt">Use multiple independent scorers</span><span class="seg"><button data-v="A">A</button><button data-v="B">B</button></span></div>
+  </div>
+  <div class="actions"><button class="btn go" data-reveal>Check</button><button class="btn" data-panel="p14">Show all 14 strategies</button></div>
+  <p class="small rv"><b>Key takeaway:</b> reliability = (1) consistent candidate performance + (2) consistent scoring.</p>
+  <div class="panel" id="p14" hidden>
+    <div class="row" style="align-items:center"><h2 style="flex:1;font-size:34px">The complete picture: 14 strategies</h2><button class="btn" data-panel="p14">Close</button></div>
+    <div class="grid2" style="gap:30px">
+      <div class="col" style="gap:8px"><span class="tag">A · Candidate / test side</span><ol>
+        <li>Take enough samples of behaviour</li><li>Exclude items that don’t discriminate weaker from stronger</li><li>Don’t allow candidates too much freedom</li><li>Write unambiguous items</li><li>Provide clear, explicit instructions</li><li>Well laid out, perfectly legible tests</li><li>Familiarise candidates with format and techniques</li></ol></div>
+      <div class="col" style="gap:8px"><span class="tag">B · Scorer side</span><ol>
+        <li>Items that allow scoring as objective as possible</li><li>Make comparisons between candidates direct</li><li>Provide a detailed scoring key</li><li>Train scorers</li><li>Agree acceptable responses and scores beforehand</li><li>Identify candidates by number, not name</li><li>Employ multiple independent scorers</li></ol></div>
+    </div>
+  </div>
+  <aside class="notes"><ul><li>Hai đội luân phiên chọn A/B; bấm Check.</li><li>Sau đó mở "Show all 14" để xem toàn bộ, không giải thích từng cái.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="1">
+  <div class="top"><span class="sec">2.5 · Case study</span><span class="kind">Example</span><span class="mins">~1:00</span></div>
+  <h2>2025 national graduation exam: add writing?</h2>
+  <p class="small muted">The 2018 curriculum targets four-skill communicative competence; the exam mainly tests reading and grammar (Nguyen &amp; Dao, 2025).</p>
+  <div class="stepper col" style="gap:0">
+    <div class="step shown"><span class="num">1</span><div><h3>Current format</h3><p>Mostly objective, selected-response tasks.</p></div><p class="muted">Little judgement: scorer consistency is easy.</p></div>
+    <div class="step"><span class="num">2</span><div><h3>Proposed improvement</h3><p>Add Writing to reflect communicative competence.</p></div><p class="muted">Validity may rise; Writing needs judgement.</p></div>
+    <div class="step"><span class="num">3</span><div><h3>New challenge</h3><p>Examiners may read one script differently.</p></div><p class="muted">An <b>inter-rater reliability</b> problem.</p></div>
+    <div class="step"><span class="num">4</span><div><h3>Solution</h3><p>Analytic rubrics, examiner training, calibration.</p></div><p class="muted">Less scorer variation.</p></div>
+  </div>
+  <div class="actions"><button class="btn go" data-step-next>Next stage</button><span class="hint">Ask the room to predict each stage first.</span></div>
+  <aside class="notes"><ul><li>Trước mỗi bước, hỏi lớp đoán rồi mới bấm Next stage.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="rel" data-min="1">
+  <div class="top"><span class="sec">Validity × Reliability</span><span class="kind">Play</span><span class="mins">~1:00</span></div>
+  <h2>The easiest thing to test reliably is not always what we most want to measure</h2>
+  <div class="row fill" style="gap:26px;align-items:center">
+    <svg viewBox="0 0 620 300" width="580" height="280" role="img" aria-label="Seesaw between reliability and validity"><g id="seesaw"></g></svg>
+    <div class="col" style="flex:1;gap:12px">
+      <label class="small" for="mix"><b>Share of performance tasks</b> (writing, speaking)</label>
+      <input type="range" id="mix" min="0" max="100" value="20">
+      <div class="row mono muted" style="justify-content:space-between;font-size:16px"><span>all MC</span><span>all performance</span></div>
+      <p class="small" id="mixText"></p>
+      <p class="cite">Illustrative: shows the trade-off, not measured values.</p>
+    </div>
+  </div>
+  <div class="card note"><p class="small">Turning writing into MC, or over-restricting prompts, raises reliability but can <b>lower validity</b>.</p></div>
+  <aside class="notes"><ul><li>Kéo thanh trượt; hỏi: vị trí nào hợp lý cho kỳ thi tốt nghiệp THPT?</li></ul></aside>
+</section>
+
+<!-- ============ 3 WASHBACK ============ -->
+<section class="slide" data-sec="wash" data-min="1">
+  <div class="top"><span class="sec">3.1 · Positive &amp; negative washback</span><span class="kind theory">Theory</span><span class="mins">~1:00</span></div>
+  <h2>Washback: what does the test make people do?</h2>
+  <div class="row fill" style="gap:26px">
+    <div class="col" style="flex:1.15;gap:14px">
+      <p class="def"><b>Washback</b> (backwash) is the effect of testing on teaching and learning.</p>
+      <div class="card" style="border-left:6px solid var(--ok)"><span class="tag" style="color:var(--ok)">Positive (beneficial)</span><p class="small">Preparing for the test means developing the abilities the course aims at.</p></div>
+      <div class="card" style="border-left:6px solid var(--bad)"><span class="tag" style="color:var(--bad)">Negative (harmful)</span><p class="small">Test content or techniques differ from course objectives, so teaching narrows to the test.</p></div>
+    </div>
+    <svg viewBox="0 0 440 260" width="440" height="260" role="img" aria-label="The test feeds back into teaching and learning">
+      <rect x="290" y="96" width="140" height="74" rx="8" class="s-wash"/><text x="360" y="141" text-anchor="middle" class="disp s-paper" font-size="26" font-weight="600">Test</text>
+      <rect x="10" y="30" width="180" height="64" rx="8" class="s-soft"/><rect x="10" y="30" width="180" height="64" rx="8" class="no k-ink" stroke-width="2"/><text x="100" y="69" text-anchor="middle" class="s-ink" font-size="21" font-weight="600">Teaching</text>
+      <rect x="10" y="170" width="180" height="64" rx="8" class="s-soft"/><rect x="10" y="170" width="180" height="64" rx="8" class="no k-ink" stroke-width="2"/><text x="100" y="209" text-anchor="middle" class="s-ink" font-size="21" font-weight="600">Learning</text>
+      <path d="M196 62 C 250 62, 268 96, 286 116" class="no k-muted" stroke-width="2.5"/>
+      <path d="M196 202 C 250 202, 268 170, 286 150" class="no k-muted" stroke-width="2.5"/>
+      <path d="M360 92 C 360 4, 120 6, 104 24" class="no k-mark" stroke-width="7" stroke-linecap="round"/>
+      <path d="M360 174 C 360 262, 120 260, 104 240" class="no k-mark" stroke-width="7" stroke-linecap="round"/>
+      <text x="246" y="40" text-anchor="middle" class="mono s-muted" font-size="16">washback</text>
+    </svg>
+  </div>
+  <aside class="notes"><ul><li>Định nghĩa (Hughes &amp; Hughes, 2020). Tích cực: ôn thi = phát triển đúng năng lực mục tiêu. Tiêu cực: nội dung/kỹ thuật thi lệch mục tiêu → dạy học thu hẹp theo đề.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="wash" data-min="1" data-scope>
+  <div class="top"><span class="sec">3.1 · Positive &amp; negative washback</span><span class="kind">Example · Sort</span><span class="mins">~1:00</span></div>
+  <div class="row" style="align-items:end"><h2 style="flex:1">Positive or negative?</h2><button class="tmr" data-s="30"></button></div>
+  <div class="col" style="gap:0">
+    <div class="cls" data-ans="N"><span class="txt">The exam has no speaking, so Grade 12 classes drop speaking practice all year.</span><span class="seg"><button data-v="P">Positive</button><button data-v="N">Negative</button></span></div>
+    <div class="cls" data-ans="P"><span class="txt">A new interview task leads teachers to add regular pair speaking.</span><span class="seg"><button data-v="P">Positive</button><button data-v="N">Negative</button></span></div>
+    <div class="cls" data-ans="N"><span class="txt">Students memorise elimination tricks for MC instead of reading.</span><span class="seg"><button data-v="P">Positive</button><button data-v="N">Negative</button></span></div>
+    <div class="cls" data-ans="P"><span class="txt">An email-writing task gets students writing real messages.</span><span class="seg"><button data-v="P">Positive</button><button data-v="N">Negative</button></span></div>
+  </div>
+  <div class="actions"><button class="btn go" data-reveal>Check</button></div>
+  <aside class="notes"><ul><li>Mỗi đội 2 tình huống, 30 giây. Hỏi thêm: "Ở trường bạn, washback nào rõ nhất?"</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="wash" data-min="1.5">
+  <div class="top"><span class="sec">3.2 · Achieving positive washback</span><span class="kind">Theory → Dot vote</span><span class="mins">~1:30</span></div>
+  <h2>Eight ways to achieve positive washback</h2>
+  <div class="grid4 fill">
+    <button class="dv"><span class="k">1</span><span class="lab">Test the abilities you want to encourage</span><span class="ex">Want speaking? Test speaking, with real weight.</span><span class="dots"></span></button>
+    <button class="dv"><span class="k">2</span><span class="lab">Sample widely and unpredictably</span><span class="ex">So nobody can prepare for a narrow set of tasks.</span><span class="dots"></span></button>
+    <button class="dv"><span class="k">3</span><span class="lab">Use direct testing</span><span class="ex">Practising for the test means practising the skill.</span><span class="dots"></span></button>
+    <button class="dv"><span class="k">4</span><span class="lab">Make testing criterion-referenced</span><span class="ex">Clear descriptions of what students can do.</span><span class="dots"></span></button>
+    <button class="dv"><span class="k">5</span><span class="lab">Base achievement tests on objectives</span><span class="ex">Objectives, not just the textbook, drive the test.</span><span class="dots"></span></button>
+    <button class="dv"><span class="k">6</span><span class="lab">Make the test known and understood</span><span class="ex">Share specs, rationale and samples with students and teachers.</span><span class="dots"></span></button>
+    <button class="dv"><span class="k">7</span><span class="lab">Provide assistance to teachers</span><span class="ex">New tests may need new methods and training.</span><span class="dots"></span></button>
+    <button class="dv"><span class="k">8</span><span class="lab">Count the cost</span><span class="ex">Weigh the cost of a better test against harmful washback.</span><span class="dots"></span></button>
+  </div>
+  <p class="hint">Vote: which is hardest in your school? Click a card per hand; right-click removes. Hughes &amp; Hughes (2020)</p>
+  <aside class="notes"><ul><li>Đọc lướt 8 nguyên tắc (lý thuyết), sau đó mỗi người 1 phiếu: nguyên tắc nào khó áp dụng nhất ở trường mình?</li><li>Mời 1 người giải thích lựa chọn nhiều phiếu nhất.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="wash" data-min="1">
+  <div class="top"><span class="sec">3.2 · Case · TOEFL iBT</span><span class="kind">Example</span><span class="mins">~1:00</span></div>
+  <h2>TOEFL iBT before and after 21 January 2026</h2>
+  <p class="small muted">ETS’s test of academic English for non-native speakers: Reading, Listening, Speaking, Writing.</p>
+  <div class="tw"><table class="t">
+    <thead><tr><th style="width:140px">Section</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>Reading</td><td>2 long academic passages, fixed difficulty</td><td><b>50 adaptive items</b>: Complete the Words · Daily Life · Academic Passage</td></tr>
+      <tr><td>Listening</td><td>3 lectures + 2 conversations, fixed</td><td><b>47 adaptive items</b>: Choose a Response · Conversation · Announcement · Academic Talk</td></tr>
+      <tr><td>Writing</td><td>Integrated task + Academic Discussion</td><td><b>12 items</b>: Build a Sentence · Write an Email · Academic Discussion</td></tr>
+      <tr><td>Speaking</td><td>1 independent + 3 integrated tasks</td><td><b>11 items</b>: Listen and Repeat · Take an Interview</td></tr>
+    </tbody>
+  </table></div>
+  <aside class="notes"><ul><li>Hỏi 20 giây: định dạng mới khuyến khích loại tiếng Anh nào? (đời sống, email, phỏng vấn).</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="wash" data-min="1" data-scope>
+  <div class="top"><span class="sec">3.2 · Case · TOEFL iBT</span><span class="kind">Example · Match</span><span class="mins">~1:00</span></div>
+  <h2>Which principle does each change reflect?</h2>
+  <div class="grid4" style="font-size:19px;gap:8px 14px">
+    <span><b class="mono">1</b> Test abilities to encourage</span><span><b class="mono">2</b> Sample widely, unpredictably</span><span><b class="mono">3</b> Test known and understood</span><span><b class="mono">4</b> Assist teachers</span>
+  </div>
+  <div class="col" style="gap:10px">
+    <div class="q card line" data-ans="1"><span class="stem">Daily-life texts, emails, interviews: English for more situations.</span><span class="bubs"><button class="bub" data-v="1">1</button><button class="bub" data-v="2">2</button><button class="bub" data-v="3">3</button><button class="bub" data-v="4">4</button></span></div>
+    <div class="q card line" data-ans="2"><span class="stem">Many more task types: narrow drilling no longer pays off.</span><span class="bubs"><button class="bub" data-v="1">1</button><button class="bub" data-v="2">2</button><button class="bub" data-v="3">3</button><button class="bub" data-v="4">4</button></span></div>
+    <div class="q card line" data-ans="3"><span class="stem">New student guides, walkthroughs, practice sets.</span><span class="bubs"><button class="bub" data-v="1">1</button><button class="bub" data-v="2">2</button><button class="bub" data-v="3">3</button><button class="bub" data-v="4">4</button></span></div>
+    <div class="q card line" data-ans="4"><span class="stem">Teacher FAQs, lesson plans, practice tests, rubrics.</span><span class="bubs"><button class="bub" data-v="1">1</button><button class="bub" data-v="2">2</button><button class="bub" data-v="3">3</button><button class="bub" data-v="4">4</button></span></div>
+  </div>
+  <div class="actions"><button class="btn go" data-reveal>Check</button><span class="cite">ETS (2026); Hughes &amp; Hughes (2020)</span></div>
+  <aside class="notes"><ul><li>Hai đội luân phiên ghép. Mỗi câu đúng +1.</li></ul></aside>
+</section>
+
+<!-- ============ CLOSE ============ -->
+<section class="slide" data-sec="intro" data-min="1.5">
+  <div class="top"><span class="sec">Exit ticket</span><span class="kind">Rapid fire</span><span class="mins">~1:30</span></div>
+  <h2>Five questions, first hand up answers</h2>
+  <div class="col" style="gap:10px">
+    <div class="card line" data-scope style="padding:10px 18px"><div class="row" style="align-items:center;gap:16px"><p class="small" style="flex:1"><b>1.</b> Reading test deducts marks for spelling?</p><span class="ans rv" style="flex:.8">Scoring validity</span><button class="btn" data-reveal>Answer</button></div></div>
+    <div class="card line" data-scope style="padding:10px 18px"><div class="row" style="align-items:center;gap:16px"><p class="small" style="flex:1"><b>2.</b> One form, one sitting: which method?</p><span class="ans rv" style="flex:.8">Split half</span><button class="btn" data-reveal>Answer</button></div></div>
+    <div class="card line" data-scope style="padding:10px 18px"><div class="row" style="align-items:center;gap:16px"><p class="small" style="flex:1"><b>3.</b> Two examiners: 5 and 8 for one essay?</p><span class="ans rv" style="flex:.8">Inter-scorer reliability</span><button class="btn" data-reveal>Answer</button></div></div>
+    <div class="card line" data-scope style="padding:10px 18px"><div class="row" style="align-items:center;gap:16px"><p class="small" style="flex:1"><b>4.</b> No speaking on the exam, so none in class?</p><span class="ans rv" style="flex:.8">Negative washback</span><button class="btn" data-reveal>Answer</button></div></div>
+    <div class="card line" data-scope style="padding:10px 18px"><div class="row" style="align-items:center;gap:16px"><p class="small" style="flex:1"><b>5.</b> Reliable but not valid? Valid but not reliable?</p><span class="ans rv" style="flex:.8"><b>Yes</b> / <b>No</b></span><button class="btn" data-reveal>Answer</button></div></div>
+  </div>
+  <aside class="notes"><ul><li>Ai giơ tay trước trả lời; đúng +1. Câu 5: bài thi không tin cậy thì không thể có giá trị.</li></ul></aside>
+</section>
+
+<section class="slide" data-sec="intro" data-min="0.5">
+  <div class="top"><span class="sec">Takeaways</span><span class="mins">~0:30</span></div>
+  <div class="grid3">
+    <div class="card" style="border-top:6px solid var(--val)"><span class="tag" style="color:var(--val)">Validity</span><h3>Test the right thing, the whole thing, and score only that.</h3></div>
+    <div class="card" style="border-top:6px solid var(--rel)"><span class="tag" style="color:var(--rel)">Reliability</span><h3>Consistent candidates and scorers. Demand more as stakes rise.</h3></div>
+    <div class="card" style="border-top:6px solid var(--wash)"><span class="tag" style="color:var(--wash)">Washback</span><h3>Tests shape classrooms. Design for the teaching you want.</h3></div>
+  </div>
+  <div class="row fill" style="gap:34px;align-items:center">
+    <div class="col" style="flex:.8">
+      <h1 style="font-size:60px">Thank you. Questions?</h1>
+      <p class="muted">Group 2 · QH.26.D1</p>
+    </div>
+    <div class="col" style="flex:1.2;gap:5px;color:var(--muted);font-size:15px;line-height:1.35">
+      <span class="tag" style="color:var(--muted);font-size:14px">References</span>
+      <span>Hughes, A., &amp; Hughes, J. (2020). <i>Testing for language teachers</i>. Cambridge University Press.</span>
+      <span>ETS. (2026, April 23). Inside the TOEFL iBT updates: Validity by design.</span>
+      <span>Messick, S. (1996). Validity and washback in language testing. <i>Language Testing, 13</i>(3), 241–256.</span>
+      <span>Nguyen, C. L. T., &amp; Dao, Q. T. N. (2025). Assessing the washback effects of the 2025 National High School Graduation Exam. <i>Vietnam Journal of Education, 9</i>(3), 424–436.</span>
+      <span>ETS. (n.d.). Test content and structure of the TOEFL iBT test.</span>
+    </div>
+  </div>
+  <aside class="notes"><ul><li>Tóm tắt 3 ý, công bố đội thắng, mời câu hỏi.</li></ul></aside>
+</section>
+
+</div>
+<div id="notes" hidden><h4>Speaker notes</h4><div id="notesBody"></div></div>
+</div>
+
+<div id="bar">
+  <div class="grp"><button class="ic" id="prev" aria-label="Previous slide">◀</button><span id="count">1</span><button class="ic" id="next" aria-label="Next slide">▶</button></div>
+  <div id="prog" aria-label="Slides"></div>
+  <button class="ic" id="clock" title="Start or pause the 30-minute clock (T)">▶ 00:00 / 30:00</button>
+  <div class="team"><span>Messick</span><b id="sA">0</b><button data-team="A" data-d="-1" aria-label="Team Messick minus one">−</button><button data-team="A" data-d="1" aria-label="Team Messick plus one">+</button></div>
+  <div class="team"><span>Hughes</span><b id="sB">0</b><button data-team="B" data-d="-1" aria-label="Team Hughes minus one">−</button><button data-team="B" data-d="1" aria-label="Team Hughes plus one">+</button></div>
+  <button class="ic opt-hide" id="nBtn" title="Speaker notes (N)">Notes</button>
+  <button class="ic opt-hide" id="fsBtn" title="Fullscreen (F)">Full screen</button>
+</div>
+
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const NS='http://www.w3.org/2000/svg';
+const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e};
+const txt=(x,y,s,attrs,parent)=>{const t=el('text',Object.assign({x,y},attrs),parent);t.textContent=s;return t};
+
+const vp=$('#viewport'), stage=$('#stage');
+function fit(){const r=vp.getBoundingClientRect();const s=Math.min((r.width-16)/1280,(r.height-16)/720);stage.style.setProperty('--s',Math.max(.1,s))}
+new ResizeObserver(fit).observe(vp); fit();
+
+const slides=$$('.slide'); let cur=0;
+const secColor={intro:'var(--ink)',val:'var(--val)',rel:'var(--rel)',wash:'var(--wash)'};
+const prog=$('#prog');
+slides.forEach((s,i)=>{const b=document.createElement('button');b.style.setProperty('--c',secColor[s.dataset.sec]||'var(--ink)');b.title='Slide '+(i+1);b.onclick=()=>go(i);prog.appendChild(b)});
+const planEnd=[];slides.reduce((a,s,i)=>(planEnd[i]=a+parseFloat(s.dataset.min||0)),0);
+function go(i){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+  $$('#prog button').forEach((b,k)=>{b.classList.toggle('cur',k===cur);b.classList.toggle('done',k<cur)});
+  $('#count').textContent=(cur+1)+'/'+slides.length;
+  const n=$('aside.notes',slides[cur]);$('#notesBody').innerHTML=n?n.innerHTML:'<p>No notes.</p>';
+  try{history.replaceState(null,'','#s'+(cur+1))}catch(e){}
+  tickClock();
+}
+$('#prev').onclick=()=>go(cur-1); $('#next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input'))return;
+  const k=e.key;
+  if(['ArrowRight','PageDown'].includes(k)||(k===' '&&!e.target.closest('button'))){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp'].includes(k)){e.preventDefault();go(cur-1)}
+  else if(k==='Home')go(0); else if(k==='End')go(slides.length-1);
+  else if(k==='n'||k==='N')toggleNotes();
+  else if(k==='f'||k==='F')fs();
+  else if(k==='t'||k==='T')toggleClock();
+});
+let tx=null;vp.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+vp.addEventListener('touchend',e=>{if(tx==null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(cur+(d<0?1:-1));tx=null});
+function toggleNotes(){$('#notes').hidden=!$('#notes').hidden}
+$('#nBtn').onclick=toggleNotes;
+function fs(){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+$('#fsBtn').onclick=fs;
+
+let running=false, elapsed=0, last=0;
+const fmt=s=>{s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+function tickClock(){
+  const c=$('#clock');c.textContent=(running?'❚❚ ':'▶ ')+fmt(elapsed)+' / 30:00';
+  const behind=elapsed>planEnd[cur]*60+30;c.classList.toggle('behind',behind);
+  c.title=(behind?'Behind plan: this slide should end by ':'On plan. This slide ends by ')+fmt(planEnd[cur]*60);
+}
+function toggleClock(){running=!running;last=performance.now();tickClock()}
+$('#clock').onclick=toggleClock;
+setInterval(()=>{if(running){const n=performance.now();elapsed+=(n-last)/1000;last=n;tickClock()}},500);
+
+const score={A:0,B:0};
+$$('[data-team]').forEach(b=>b.onclick=()=>{const t=b.dataset.team;score[t]=Math.max(0,score[t]+ +b.dataset.d);$('#s'+t).textContent=score[t]});
+
+function evaluate(scope){
+  $$('.q',scope).forEach(q=>{const a=q.dataset.ans;$$('.bub',q).forEach(b=>{b.classList.toggle('is-ans',b.dataset.v===a);b.classList.toggle('wrong',b.dataset.v!==a)})});
+  $$('.cls',scope).forEach(c=>{const a=c.dataset.ans;$$('.seg button',c).forEach(b=>{b.classList.toggle('is-ans',b.dataset.v===a);b.classList.toggle('wrong',b.dataset.v!==a)})});
+  $$('.tally',scope).forEach(t=>$$('.opt',t).forEach(o=>o.classList.toggle('is-ans',o.dataset.v===t.dataset.ans)));
+  $$('.rank',scope).forEach(r=>{const ord=r.dataset.order.split(',');$$('.rk',r).forEach(k=>{$('.truth',k).textContent='→ '+(ord.indexOf(k.dataset.v)+1)})});
+}
+function tallyUpdate(t){const opts=$$('.opt',t);const max=Math.max(1,...opts.map(o=>+o.dataset.n||0));opts.forEach(o=>{const n=+o.dataset.n||0;$('.n',o).textContent=n;$('.bar',o).style.width=(n/max*100)+'%'})}
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const rv=t.closest('[data-reveal]');
+  if(rv){const sc=rv.closest('[data-scope]')||rv.closest('.slide');sc.classList.toggle('revealed');evaluate(sc);return}
+  const bub=t.closest('.q .bub');
+  if(bub){$$('.bub',bub.closest('.q')).forEach(b=>b.classList.toggle('sel',b===bub&&!b.classList.contains('sel')));return}
+  const sb=t.closest('.seg button');
+  if(sb){$$('button',sb.parentNode).forEach(b=>b.classList.toggle('sel',b===sb&&!b.classList.contains('sel')));return}
+  const opt=t.closest('.tally .opt');
+  if(opt){opt.dataset.n=(+opt.dataset.n||0)+1;tallyUpdate(opt.closest('.tally'));return}
+  const rk=t.closest('.rk');
+  if(rk&&!rk.classList.contains('ranked')){const r=rk.closest('.rank');const n=$$('.rk.ranked',r).length+1;rk.classList.add('ranked');$('.pos',rk).textContent=n;return}
+  const rr=t.closest('[data-rank-reset]');
+  if(rr){const sl=rr.closest('.slide');$$('.rk',sl).forEach(k=>{k.classList.remove('ranked');$('.pos',k).textContent=''});return}
+  const dv=t.closest('.dv');
+  if(dv){$('.dots',dv).appendChild(document.createElement('i'));return}
+  const pn=t.closest('[data-panel]');
+  if(pn){const p=document.getElementById(pn.dataset.panel);p.hidden=!p.hidden;return}
+  const sn=t.closest('[data-step-next]');
+  if(sn){const st=$$('.step',sn.closest('.slide'));const nx=st.find(s=>!s.classList.contains('shown'));if(nx)nx.classList.add('shown');else st.forEach((s,i)=>s.classList.toggle('shown',i===0));sn.textContent=st.every(s=>s.classList.contains('shown'))?'Start over':'Next stage';return}
+});
+document.addEventListener('contextmenu',e=>{
+  const opt=e.target.closest('.tally .opt');
+  if(opt){e.preventDefault();opt.dataset.n=Math.max(0,(+opt.dataset.n||0)-1);tallyUpdate(opt.closest('.tally'));return}
+  const dv=e.target.closest('.dv');
+  if(dv){e.preventDefault();const d=$('.dots',dv);if(d.lastChild)d.removeChild(d.lastChild)}
+});
+
+$$('.tmr').forEach(b=>{
+  const total=+b.dataset.s;let left=total,iv=null;const C=2*Math.PI*12;
+  b.innerHTML='<svg viewBox="0 0 30 30" aria-hidden="true"><circle class="trk" cx="15" cy="15" r="12"/><circle class="prg" cx="15" cy="15" r="12" stroke-dasharray="'+C+'" stroke-dashoffset="0"/></svg><span></span>';
+  const span=$('span',b),prg=$('.prg',b);
+  const draw=()=>{span.textContent=left>0?fmt(left):'Time!';prg.style.strokeDashoffset=C*(1-left/total)};
+  b.title='Start or pause timer. Double-click to reset.';
+  b.addEventListener('click',()=>{if(left<=0){left=total;b.classList.remove('done')}
+    if(iv){clearInterval(iv);iv=null;b.classList.remove('run')}else{b.classList.add('run');iv=setInterval(()=>{left--;draw();if(left<=0){clearInterval(iv);iv=null;b.classList.remove('run');b.classList.add('done')}},1000)}draw()});
+  b.addEventListener('dblclick',()=>{clearInterval(iv);iv=null;left=total;b.classList.remove('run','done');draw()});
+  draw();
+});
+
+$$('.track').forEach(t=>{for(let i=0;i<+t.dataset.n;i++){const c=document.createElement('i');if(i<+t.dataset.on)c.className='on';t.appendChild(c)}});
+const g=$('#guess');g.oninput=()=>$('#guessOut').textContent=g.value+'/29';
+
+/* ---------- SVG builds ---------- */
+(()=>{const G=$('#sheetRows');const picks=[1,3,0,2,1,2,3,0,1];
+  picks.forEach((p,r)=>{const y=110+r*31;txt(52,y+5,String(r+1).padStart(2,'0'),{class:'mono s-muted','font-size':13},G);
+    ['A','B','C','D'].forEach((L,c)=>{const cx=110+c*52;const filled=c===p;el('circle',{cx,cy:y,r:11,class:filled?'s-ink':'no k-ink','stroke-width':1.6},G);if(!filled)txt(cx,y+4,L,{class:'mono s-muted','font-size':11,'text-anchor':'middle'},G)});
+    el('rect',{x:320,y:y-6,width:16,height:12,rx:2,class:r%3===1?'s-val':(r%3===2?'s-rel':'s-wash')},G)});
+})();
+(()=>{const G=$('#agenda');const segs=[['Warm-up',2.5,'s-ink'],['Validity',10,'s-val'],['Reliability',9,'s-rel'],['Washback',5.5,'s-wash'],['Close',2,'s-ink']];
+  const W=1140,u=W/30;let x=10;
+  segs.forEach(([n,m,c],i)=>{const w=m*u;el('rect',{x:x+1,y:20,width:w-2,height:40,rx:4,class:c,opacity:i===0||i===4?.75:1},G);
+    txt(x+10,47,n,{class:'s-paper','font-size':19,'font-weight':600},G);
+    const end=Math.round((x-10+w)/u*10)/10;txt(x+w-4,88,end+'′',{class:'mono s-muted','font-size':16,'text-anchor':'end'},G);x+=w});
+  txt(10,88,"0′",{class:'mono s-muted','font-size':16},G);
+})();
+(()=>{const G=$('#sampleViz');
+  const draw=(ox,label,pts)=>{txt(ox+95,20,label,{'text-anchor':'middle',class:'s-ink','font-size':18,'font-weight':700},G);
+    ['U1','U2','U3'].forEach((u,i)=>{const y=34+i*84;el('rect',{x:ox,y,width:190,height:72,rx:6,class:'s-paper'},G);el('rect',{x:ox,y,width:190,height:72,rx:6,class:'no k-line','stroke-width':2},G);txt(ox+10,y+24,u,{class:'mono s-muted','font-size':15},G);
+      for(let k=0;k<8;k++)el('circle',{cx:ox+56+(k%4)*36,cy:y+22+Math.floor(k/4)*28,r:6,class:'s-line'},G);
+      (pts[i]||[]).forEach(k=>el('circle',{cx:ox+56+(k%4)*36,cy:y+22+Math.floor(k/4)*28,r:10,class:'s-mark'},G))});};
+  draw(0,'Representative',[[0,3,5],[1,6,4],[2,7,5]]);
+  draw(225,'Skewed',[[0,1,2,3,4,5,6],[2],[]]);
+})();
+(()=>{const G=$('#ruler');for(let i=0;i<=10;i++){const x=40+i*108;el('line',{x1:x,x2:x,y1:i%5===0?30:36,y2:44,class:'k-ink','stroke-width':1.5},G);txt(x,24,(i/10).toFixed(1),{class:'mono s-muted','font-size':15,'text-anchor':'middle'},G)}
+  const M=$('#rankMarks');[['B',.55],['A',.62],['D',.82],['C',.9]].forEach(([l,v])=>{const x=40+v*1080;el('path',{d:`M${x} 72 l-10 16 h20z`,class:'s-ink'},M);txt(x,64,l,{'text-anchor':'middle',class:'mono s-ink','font-size':17,'font-weight':700},M)});
+})();
+(()=>{const G=$('#splitRows');for(let i=0;i<6;i++){el('rect',{x:22,y:4+i*4.2,width:16,height:2.6,class:i%2?'s-rel':'s-mark'},G)}})();
+function person(G,x,y,cls){el('circle',{cx:x,cy:y,r:15,class:cls},G);el('path',{d:`M${x-23} ${y+48} q23 -46 46 0z`,class:cls},G)}
+function paper(G,x,y,mark){el('rect',{x,y,width:60,height:74,rx:4,class:'s-soft'},G);el('rect',{x,y,width:60,height:74,rx:4,class:'no k-ink','stroke-width':1.8},G);for(let i=0;i<4;i++)el('rect',{x:x+9,y:y+12+i*10,width:42-(i%2)*10,height:3,class:'s-line'},G);txt(x+30,y+68,mark,{'text-anchor':'middle',class:'disp s-rel','font-size':19,'font-weight':700},G)}
+(()=>{const G=$('#intra');person(G,60,36,'s-rel');txt(60,116,'same scorer',{'text-anchor':'middle',class:'s-muted','font-size':16},G);
+  paper(G,150,14,'6.5');paper(G,330,14,'6.5');txt(180,112,'Monday',{'text-anchor':'middle',class:'mono s-muted','font-size':15},G);txt(360,112,'Friday',{'text-anchor':'middle',class:'mono s-muted','font-size':15},G);
+  el('path',{d:'M216 51 H324',class:'no k-muted','stroke-width':2,'stroke-dasharray':'5 5'},G);txt(270,44,'=',{'text-anchor':'middle',class:'s-ok','font-size':26,'font-weight':700},G)})();
+(()=>{const G=$('#inter');paper(G,200,14,'6.5');person(G,70,36,'s-rel');person(G,390,36,'s-val');
+  txt(70,116,'scorer 1: 6.5',{'text-anchor':'middle',class:'s-muted','font-size':16},G);txt(390,116,'scorer 2: 6.5',{'text-anchor':'middle',class:'s-muted','font-size':16},G);
+  el('path',{d:'M100 51 H192',class:'no k-muted','stroke-width':2,'stroke-dasharray':'5 5'},G);el('path',{d:'M268 51 H360',class:'no k-muted','stroke-width':2,'stroke-dasharray':'5 5'},G)})();
+
+const semIn=$('#sem');
+function drawSEM(){
+  const sem=+semIn.value;$('#semOut').textContent=sem.toFixed(1);
+  const G=$('#semPlot');G.innerHTML='';
+  const X=v=>30+(v-4.5)/6*540, Y0=262, H=190;
+  const obs=7.5, pdf=v=>Math.exp(-.5*((v-obs)/sem)**2);
+  [[2,.18],[1,.32]].forEach(([k,op])=>{const a=Math.max(4.5,obs-k*sem),b=Math.min(10.5,obs+k*sem);let d=`M${X(a)} ${Y0}`;for(let v=a;v<=b+1e-9;v+=.02)d+=` L${X(v)} ${Y0-H*pdf(v)}`;d+=` L${X(b)} ${Y0}Z`;el('path',{d,class:'s-rel',opacity:op},G)});
+  let d='';for(let v=4.5;v<=10.5;v+=.02)d+=(d?' L':'M')+X(v)+' '+(Y0-H*pdf(v));el('path',{d,class:'no k-ink','stroke-width':2.5},G);
+  el('line',{x1:30,x2:570,y1:Y0,y2:Y0,class:'k-ink','stroke-width':1.5},G);
+  for(let v=5;v<=10;v++){el('line',{x1:X(v),x2:X(v),y1:Y0,y2:Y0+7,class:'k-ink','stroke-width':1.5},G);txt(X(v),Y0+28,String(v),{'text-anchor':'middle',class:'mono s-muted','font-size':18},G)}
+  el('line',{x1:X(7),x2:X(7),y1:60,y2:Y0,class:'k-bad','stroke-width':2.5,'stroke-dasharray':'7 5'},G);txt(X(7)-8,100,'pass 7.0',{'text-anchor':'end',class:'s-bad','font-size':18,'font-weight':700},G);
+  el('line',{x1:X(obs),x2:X(obs),y1:Y0-H,y2:Y0,class:'k-ink','stroke-width':2},G);txt(X(obs)+8,Y0-H-12,'observed 7.5',{'text-anchor':'start',class:'s-ink','font-size':19,'font-weight':700},G);
+  txt(570,Y0+62,'dark: ±1 SEM (≈68%)   light: ±2 SEM (≈95%)',{'text-anchor':'end',class:'s-muted','font-size':16},G);
+  const lo1=(obs-sem).toFixed(1),hi1=(obs+sem).toFixed(1),lo2=(obs-2*sem).toFixed(1),hi2=(obs+2*sem).toFixed(1);
+  const safe=obs-2*sem>=7;
+  $('#semText').innerHTML=`68% sure: <b>${lo1}–${hi1}</b> · 95% sure: <b>${lo2}–${hi2}</b>. `+(safe?'Safely above 7.0.':'<b>Really above 7.0?</b> Not sure.');
+}
+semIn.oninput=drawSEM;drawSEM();
+
+const mix=$('#mix');
+function drawSeesaw(){
+  const v=+mix.value, G=$('#seesaw');G.innerHTML='';
+  const ang=(v-50)*.24;
+  el('path',{d:'M310 270 l-40 0 40 -70 40 70z',class:'s-ink'},G);
+  el('rect',{x:120,y:288,width:380,height:4,rx:2,class:'s-line'},G);
+  const B=el('g',{transform:`rotate(${ang} 310 200)`},G);
+  el('rect',{x:30,y:194,width:560,height:12,rx:6,class:'s-ink'},B);
+  el('rect',{x:40,y:104,width:190,height:90,rx:8,class:'s-rel'},B);txt(135,144,'Reliability',{'text-anchor':'middle',class:'s-paper disp','font-size':24,'font-weight':600},B);txt(135,174,'consistent scoring',{'text-anchor':'middle',class:'s-paper','font-size':16},B);
+  el('rect',{x:390,y:104,width:190,height:90,rx:8,class:'s-val'},B);txt(485,144,'Validity',{'text-anchor':'middle',class:'s-paper disp','font-size':24,'font-weight':600},B);txt(485,174,'covers the construct',{'text-anchor':'middle',class:'s-paper','font-size':16},B);
+  $('#mixText').innerHTML=v<35?'Mostly MC: very consistent scoring, but writing and speaking barely measured.':v<70?'A mix: broader coverage; scoring manageable with rubrics and trained examiners.':'Mostly performance: construct well covered, but scorer consistency needs serious investment.';
+}
+mix.oninput=drawSeesaw;drawSeesaw();
+
+const m=/^#s(\d+)$/.exec(location.hash);go(m?(+m[1]-1):0);
+})();
+</script>
+
+</body></html>
